@@ -33,7 +33,10 @@ void MessageQueue<T>::send(T &&msg)
 
     // add msg to the back of queue?
     //std::cout << "   Message" << msg << " has been sent to the queue" << std::endl;
-    _queue.push_back(std::move(msg));
+
+    //_queue.push_back(std::move(msg));
+    //Use emplace_back directly here as inside its implementation it moves the obj
+    _queue.emplace_back(std::move(msg));
     _condition.notify_one();
 }
 
@@ -80,7 +83,11 @@ void TrafficLight::cycleThroughPhases()
     // to the message queue using move semantics. The cycle duration should be a random value between 4 and 6 seconds. 
     // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms between two cycles. 
     while(true){
-        std::this_thread::sleep_for(std::chrono::seconds(rand() % 3 + 4));
+        //Consider using the Mersenne twister algorithm based mt19937 library to generate a random number.
+        std::default_random_engine generator;
+        std::uniform_int_distribution<int> distribution(4,6);
+        int cycle_duration = distribution(generator);  // generates number in the range 1..6
+        std::this_thread::sleep_for(std::chrono::seconds(cycle_duration));
         switch (_currentPhase){
             case(TrafficLightPhase::red): _currentPhase = TrafficLightPhase::green;break;
             case(TrafficLightPhase::green):_currentPhase = TrafficLightPhase::red;break;
