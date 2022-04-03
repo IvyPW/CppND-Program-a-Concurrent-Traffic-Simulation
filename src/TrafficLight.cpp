@@ -18,9 +18,8 @@ T MessageQueue<T>::receive()
     //pass a Lambda to wait(), which repeatedly checks wether the vector contains elements (thus the inverted logical expression):
     _condition.wait(uLock, [this] { return !_queue.empty(); }); // pass unique lock to condition variable
     // remove the first element from queue?
-    T msg = std::move(_queue.back());
-    _queue.pop_back();
-    //_queue.clear();
+    T msg = std::move(_queue.front());
+    _queue.pop_front();
     return msg; // will not be copied due to return value optimization (RVO) in C++
 }
 
@@ -33,7 +32,7 @@ void MessageQueue<T>::send(T &&msg)
     std::lock_guard<std::mutex> uLock(_mutex);
 
     // add msg to the back of queue?
-    std::cout << "   Message" << msg << " has been sent to the queue" << std::endl;
+    //std::cout << "   Message" << msg << " has been sent to the queue" << std::endl;
     _queue.push_back(std::move(msg));
     _condition.notify_one();
 }
